@@ -15,9 +15,6 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-/**
- * @author Michael Ribeiro 
- */
 @Entity
 @Table(
 		name = "users",
