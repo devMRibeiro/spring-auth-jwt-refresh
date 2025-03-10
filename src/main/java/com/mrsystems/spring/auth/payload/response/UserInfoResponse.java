@@ -1,26 +1,26 @@
 package com.mrsystems.spring.auth.payload.response;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class UserInfoResponse {
 
-	private Integer id;
+	private Long id;
 	private String username;
 	private String email;
-	private ArrayList<String> alRoles;
+	private List<String> listRoles;
 
-	public UserInfoResponse(Integer id, String username, String email, ArrayList<String> alRoles) {
+	public UserInfoResponse(Long id, String username, String email, List<String> alRoles) {
 		this.id = id;
 		this.username = username;
 		this.email = email;
-		this.alRoles = alRoles;
+		this.listRoles = alRoles;
 	}
 
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -40,11 +40,11 @@ public class UserInfoResponse {
 		this.email = email;
 	}
 
-	public ArrayList<String> getAlRoles() {
-		return alRoles;
+	public List<String> getListRoles() {
+		return listRoles;
 	}
 
-	public void setAlRoles(ArrayList<String> alRoles) {
-		this.alRoles = alRoles;
+	public void setListRoles(List<String> alRoles) {
+		this.listRoles = alRoles;
 	}
 }

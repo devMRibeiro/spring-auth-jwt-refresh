@@ -49,17 +49,13 @@ public class User {
 	private HashSet<Role> roles = new HashSet<Role>();
 
 	public User(
-			Long id,
 			@NotBlank @Size(max = 20) String username,
 			@NotBlank @Size(min = 6, max = 120) String password,
-			@NotBlank @Size(max = 50) String email,
-			HashSet<Role> roles)
+			@NotBlank @Size(max = 50) String email)
 	{
-		this.id = id;
 		this.username = username;
 		this.password = password;
 		this.email = email;
-		this.roles = roles;
 	}
 
 	public User() { }
