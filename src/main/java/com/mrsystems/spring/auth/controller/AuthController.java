@@ -11,14 +11,20 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mrsystems.spring.auth.model.User;
 import com.mrsystems.spring.auth.payload.request.LoginRequest;
+import com.mrsystems.spring.auth.payload.request.SignUpRequest;
+import com.mrsystems.spring.auth.payload.response.MessageResponse;
 import com.mrsystems.spring.auth.payload.response.UserInfoResponse;
+import com.mrsystems.spring.auth.repository.RoleRepository;
+import com.mrsystems.spring.auth.repository.UserRepository;
 import com.mrsystems.spring.auth.security.jwt.JwtUtils;
 import com.mrsystems.spring.auth.security.service.UserDetailsImpl;
 
@@ -29,6 +35,9 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/auth")
 public class AuthController {
 	@Autowired private AuthenticationManager authenticationManager;
+	@Autowired private UserRepository userRepository;
+	@Autowired private RoleRepository roleRepository;
+	@Autowired private PasswordEncoder encoder;
 	@Autowired private JwtUtils jwtUtils;
 
 	@PostMapping("/signin")
@@ -54,5 +63,17 @@ public class AuthController {
 						userDetails.getUsername(),
 						userDetails.getEmail(),
 						roles));
+	}
+
+	@PostMapping("/signup")
+	public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
+
+		if (userRepository.existsByUsername(signUpRequest.getUsername()))
+			return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
+
+		if (userRepository.existsByEmail(signUpRequest.getEmail()))
+			return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
+
+		User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(), encoder.encode(signUpRequest.getPassword()));
 	}
 }
