@@ -17,6 +17,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,8 +26,8 @@ import jakarta.servlet.http.HttpServletRequest;
 public class JwtUtils {
 	private static final Logger log = LoggerFactory.getLogger(JwtUtils.class);
 
-//	@Value("${MIRASYSTEMS.APP.JWTSECRET}")
-//	private String jwtScret;
+	@Value("${MIRASYSTEMS.APP.JWTSECRET}")
+	private String jwtSecret;
 
 	@Value("${MIRASYSTEMS.APP.JWTEXPIRATIONMS}")
 	private int jwtExpirationMs;
@@ -65,8 +66,8 @@ public class JwtUtils {
 				.getSubject();
 	}
 
-	public static Key key() {
-		return Keys.secretKeyFor(SignatureAlgorithm.HS256);
+	public Key key() {
+		return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
 	}
 
 	public boolean validateJwtToken(String authToken) {
