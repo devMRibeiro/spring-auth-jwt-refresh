@@ -1,6 +1,8 @@
 package com.mrsystems.spring.auth.controller;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mrsystems.spring.auth.enums.RoleEnum;
+import com.mrsystems.spring.auth.model.Role;
 import com.mrsystems.spring.auth.model.User;
 import com.mrsystems.spring.auth.payload.request.LoginRequest;
 import com.mrsystems.spring.auth.payload.request.SignUpRequest;
@@ -75,5 +79,45 @@ public class AuthController {
 			return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
 
 		User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(), encoder.encode(signUpRequest.getPassword()));
+		
+		Set<String> hsStrRoles = signUpRequest.getHsRole();
+		HashSet<Role> hsRoles = new HashSet<Role>();
+
+		if (hsStrRoles == null) {
+			Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+			hsRoles.add(userRole);
+
+		} else {
+
+			hsStrRoles.forEach(role -> {
+
+				switch (role) {
+
+				case "admin" :
+					Role adminRole = roleRepository.findByName(RoleEnum.ROLE_ADMIN).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+					hsRoles.add(adminRole);
+					break;
+
+				case "mod" :
+
+					Role modRole = roleRepository.findByName(RoleEnum.ROLE_MODERATOR).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+					hsRoles.add(modRole);
+					break;
+
+				default:
+
+					Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+					hsRoles.add(userRole);
+
+					throw new IllegalArgumentException("Unexpected value: ");
+				}
+				
+			});
+		}
+
+		user.setRoles(hsRoles);
+		userRepository.save(user);
+
+		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
 	}
 }
