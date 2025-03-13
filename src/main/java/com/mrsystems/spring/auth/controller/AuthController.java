@@ -75,9 +75,6 @@ public class AuthController {
 		if (userRepository.existsByUsername(signUpRequest.getUsername()))
 			return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
 
-		if (userRepository.existsByEmail(signUpRequest.getEmail()))
-			return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
-
 		User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(), encoder.encode(signUpRequest.getPassword()));
 		
 		Set<String> hsStrRoles = signUpRequest.getHsRole();
@@ -119,5 +116,14 @@ public class AuthController {
 		userRepository.save(user);
 
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+	}
+	
+	@PostMapping("/signout")
+	public ResponseEntity<?> logoutUser() {
+		ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
+		
+		return ResponseEntity.ok()
+				.header(HttpHeaders.SET_COOKIE, cookie.toString())
+				.body(new MessageResponse("You've been signed out!"));
 	}
 }
