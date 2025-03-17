@@ -17,11 +17,12 @@ public class Role {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "roles_id")
 	private Long id = null;
 
 	@Enumerated(EnumType.STRING)
-	@Column(length = 20)
-	private RoleEnum name= null;
+	@Column(name = "roles_name", length = 20)
+	private RoleEnum name = null;
 
 	public Long getId() {
 		return id;

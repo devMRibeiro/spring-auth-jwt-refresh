@@ -9,5 +9,4 @@ public class SpringAuthJwtRefreshApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SpringAuthJwtRefreshApplication.class, args);
 	}
-
 }

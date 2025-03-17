@@ -1,7 +1,9 @@
 package com.mrsystems.spring.auth.model;
 
 import java.util.HashSet;
+import java.util.Set;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -26,18 +28,22 @@ public class User {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) // Correct for PSQL
+	@Column(name = "user_id")
 	private Long id = null;
 
 	@NotBlank
 	@Size(max = 20)
+	@Column(name = "user_username")
 	private String username = null;
 
 	@NotBlank
 	@Size(min = 6, max = 120)
+	@Column(name = "user_password")
 	private String password = null;
 	
 	@NotBlank
 	@Size(max = 50)
+	@Column(name = "user_email")
 	private String email = null;
 
 	@ManyToMany(fetch = FetchType.LAZY)
@@ -46,7 +52,8 @@ public class User {
 							joinColumns = @JoinColumn(name = "user_id"),
 				      inverseJoinColumns = @JoinColumn(name = "role_id")
       			)
-	private HashSet<Role> roles = new HashSet<Role>();
+	@Column(name = "user_role")
+	private Set<Role> roles = new HashSet<Role>();
 
 	public User(
 			@NotBlank @Size(max = 20) String username,
@@ -92,11 +99,11 @@ public class User {
 		this.email = email;
 	}
 
-	public HashSet<Role> getRoles() {
+	public Set<Role> getRoles() {
 		return roles;
 	}
 
-	public void setRoles(HashSet<Role> roles) {
+	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
 	}
 }
