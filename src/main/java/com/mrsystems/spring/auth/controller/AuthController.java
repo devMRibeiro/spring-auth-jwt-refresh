@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -38,17 +37,30 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-	@Autowired private AuthenticationManager authenticationManager;
-	@Autowired private UserRepository userRepository;
-	@Autowired private RoleRepository roleRepository;
-	@Autowired private PasswordEncoder encoder;
-	@Autowired private JwtUtils jwtUtils;
+	private AuthenticationManager authenticationManager;
+	private UserRepository userRepository;
+	private RoleRepository roleRepository;
+	private PasswordEncoder encoder;
+	private JwtUtils jwtUtils;
+
+	public AuthController(
+			AuthenticationManager authenticationManager,
+			UserRepository userRepository,
+			RoleRepository roleRepository,
+			PasswordEncoder encoder,
+			JwtUtils jwtUtils) {
+		this.authenticationManager = authenticationManager;
+		this.userRepository = userRepository;
+		this.roleRepository = roleRepository;
+		this.encoder = encoder;
+		this.jwtUtils = jwtUtils;
+	}
 
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticaUser(@Valid @RequestBody LoginRequest loginRequest) {
 
-		Authentication auth = authenticationManager
-				.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+		 Authentication auth = authenticationManager
+	        .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
 		SecurityContextHolder.getContext().setAuthentication(auth);
 
@@ -78,41 +90,33 @@ public class AuthController {
 		if (userRepository.existsByEmail(signUpRequest.getEmail()))
 			return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
 
-		User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(), encoder.encode(signUpRequest.getPassword()));
+		User user = new User(signUpRequest.getUsername(), encoder.encode(signUpRequest.getPassword()), signUpRequest.getEmail());
 		
 		Set<String> hsStrRoles = signUpRequest.getHsRole();
-		HashSet<Role> hsRoles = new HashSet<Role>();
+		Set<Role> hsRoles = new HashSet<Role>();
 
 		if (hsStrRoles == null) {
 			Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 			hsRoles.add(userRole);
 
 		} else {
+			
+			for (int i = 0; i < hsStrRoles.size(); i++) {
+				String role = hsStrRoles.iterator().next();
 
-			hsStrRoles.forEach(role -> {
-
-				switch (role) {
-
-				case "admin" :
+				if (role.equals("admin")) {
 					Role adminRole = roleRepository.findByName(RoleEnum.ROLE_ADMIN).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 					hsRoles.add(adminRole);
-					break;
-
-				case "mod" :
-
+				} else if (role.equals("mod")) {
 					Role modRole = roleRepository.findByName(RoleEnum.ROLE_MODERATOR).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 					hsRoles.add(modRole);
-					break;
-
-				default:
-
+				} else {
 					Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 					hsRoles.add(userRole);
 
 					throw new IllegalArgumentException("Unexpected value: ");
 				}
-				
-			});
+			}
 		}
 
 		user.setRoles(hsRoles);
